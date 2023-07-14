@@ -1,0 +1,211 @@
+
+<?php
+function strToArray($question){
+  $question_array=array();
+  while(strlen($question)>5){
+    $a=strpos($question,"|");
+      $q=substr($question,0,$a);
+      array_push($question_array, $q);
+      $question=substr($question,$a+1);
+      $b=strpos($question,"\n");
+      $r=substr($question,0,$b);
+      array_push($question_array, $r);
+      $question=substr($question,$b);
+      
+  }
+  return $question_array;
+}
+$ids=[];
+$iddd = $c_id;
+$actual_date=array();
+$company_title=array();
+$job_title1=array();
+$display_id=array();  
+$setname=array();
+$setcategory=array();
+$subject=array();
+$conn = mysqli_connect($db_servername, $db_username, $db_password, $db_dbname);
+$sql4 = "SELECT * FROM vj_interviews WHERE interview_user_id='$iddd' and interview_appid='$a_id' and interview_actual_end_date!=''";
+$display_row=0; 
+$result4 = $conn->query($sql4);
+if ($result4->num_rows > 0) {
+  // output data of each row
+  //$display_row=$result4->num_rows; 
+  while($row = $result4->fetch_assoc()) {
+    if($row['interview_actual_end_date']!='-'){
+      $display_row+=1;
+    $ques = strToArray(htmlspecialchars($row['interview_questions_playback']));
+    array_push($actual_date, $row['interview_actual_start_date']);
+    
+    array_push($ids, $row['interview_id']);
+    array_push($subject, $row['interview_subject']);
+    array_push($display_id, $row['interview_id'], $row['interview_path'], $ques); 
+    $application_id2 = $row["interview_appid"];
+    array_push($company_title,$row['interview_company']);
+    array_push($job_title1,$row['interview_job']);
+    $ttmp=$row['interview_ref'];
+    $sql="SELECT * FROM vj_question_set where set_id='1'";
+    $result41 = $conn->query($sql);
+    if ($result41->num_rows > 0) {
+        while($row41 = $result41->fetch_assoc()) {
+            array_push($setname,$row41['set_name']);
+            array_push($setcategory,$row41['set_sub_name']);
+        }
+    }
+}  }
+   
+  }
+  ?>
+   
+  <script type="text/javascript">
+      var no_of_display = '<?php echo $display_row; ?>';
+      var display_id = new Array();
+     var tempp;
+     var temppp;
+     var tempp1;
+     var tempp2;
+     var tm_q=[];
+     var tm_t=[];
+     var ids = new Array();
+    <?php foreach($ids as $key => $val){ ?>
+        ids.push('<?php echo $val; ?>');
+    <?php } ?>
+      var ques = new Array();
+      var ques1 = new Array();
+      var actual_date = new Array();
+    <?php foreach($actual_date as $key => $val){ ?>
+      actual_date.push('<?php echo $val; ?>');
+    <?php } ?>
+    var company_title = new Array();
+  <?php foreach($company_title as $key => $val){ ?>
+      company_title.push('<?php echo $val; ?>');
+  <?php } ?> 
+  var job_title = new Array();
+  <?php foreach($job_title1 as $key => $val){ ?>
+    job_title.push('<?php echo $val; ?>');
+  <?php } ?>
+  var set_name = new Array();
+  <?php foreach($setname as $key => $val){ ?>
+    set_name.push('<?php echo $val; ?>');
+  <?php } ?>
+  var set_category = new Array();
+  <?php foreach($setcategory as $key => $val){ ?>
+    set_category.push('<?php echo $val; ?>');
+  <?php } ?>
+      var ids_subtitle = <?php echo json_encode($ids); ?>;
+      let starrt =2;
+      
+      display_id = <?php echo json_encode($display_id); ?>;
+      var subject = new Array();
+      subject = <?php echo json_encode($subject); ?>;
+     
+    var path=1;
+      document.write('<div class="row">');
+      var jk;
+      for(let k=0; k<no_of_display; k++){
+        
+        ques=[];
+        ques1=[];
+        
+       ques = display_id[path+1];
+
+tm_q=[];
+tm_t=[];
+      
+for(jk=0;jk<ques.length;jk++){
+  tm_q.push(ques[jk]);
+  tm_t.push(ques[jk+1]*60);
+  jk=jk+1;
+}   
+      document.write('<div class="col-6">#'+ids[k]+'<br>'+set_category[k]+'<br>'+set_name[k]+'<br>'+subject[k]+'<br>'+actual_date[k]+'<video class="video-js video-tech" id='+display_id[path-1]+' src='+"http://localhost"+display_id[path].slice(15)+' controls></div>');  
+  
+     path+=3;
+      
+     
+      }
+      
+        document.write('</div>');
+      </script>
+      <script>
+      //myFuncsub(ids_subtitle[0]);
+      path=1;
+      for(let vb=0; vb<ids_subtitle.length; vb++){
+        
+        ques = display_id[path+1];
+        tm_q=[];
+        tm_t=[];
+      for(jk=0;jk<ques.length;jk++){
+        
+        tm_q.push(ques[jk]);
+        tm_t.push(ques[jk+1]*60);
+        jk=jk+1;
+      }
+      path+=3;
+      myFuncsub(ids_subtitle[vb]);
+      }
+var qwe=[];
+var qtg=[];
+
+var new_time=[];
+			function myFuncsub(id) {
+        
+	var video = document.getElementById(id),
+		i,
+		track,
+		loadcues = document.getElementById("loadcues"),
+		hideTracks = function() {
+			// Oddly, there's no way to remove a track from a video, so hide them instead
+			for (i = 0; i < video.textTracks.length; i++) {
+				video.textTracks[i].mode = "hidden";
+			}
+		};
+	
+
+    
+
+		hideTracks();
+		track = video.addTextTrack("captions", "English", "en");
+		track.mode = "showing";
+    
+     qwe = tm_q;  
+     qtg = tm_t;
+     let eva = 0;
+     new_time=[];
+     for(let e=0; e<qtg.length;e++){
+       if(e==0){
+        new_time.push(qtg[0]);
+       }
+       else{
+        new_time.push(qtg[e]+new_time[e-1]);
+        
+       }
+      
+     }
+     qtg = new_time;
+  let tmm=0; 
+    for(let r=0;r<qwe.length;r++){
+      if(r==qwe.length-1){
+        tmm=qtg[r-1];
+        if(r==0){
+          tmm=0;
+        }
+        
+        track.addCue(new VTTCue(tmm, qtg[r]+0.1, qwe[r]));
+      }
+      else{
+        if(r==0){
+          track.addCue(new VTTCue(0, qtg[r], qwe[r]));
+          
+        }
+        else{
+      track.addCue(new VTTCue(qtg[r-1], qtg[r], qwe[r]));
+     
+        }
+      }
+    }
+		
+
+}
+
+
+		</script>
